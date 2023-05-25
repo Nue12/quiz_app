@@ -1,17 +1,31 @@
 import { createSlice } from "@reduxjs/toolkit";
 
-const initialState = { totalScore: 0 };
+export interface User {
+  totalScore: number;
+  gameStatus: "idle" | "playing" | "finish";
+}
+
+const initialState: User = { totalScore: 0, gameStatus: "idle" };
 
 export const userSlice = createSlice({
-  name: "totalScore",
+  name: "user",
   initialState,
   reducers: {
     plusScore: (state) => {
       state.totalScore += 1;
     },
+    startGame: (state) => {
+      return { ...state, gameStatus: "playing" };
+    },
+    finishGame: (state) => {
+      return { ...state, gameStatus: "finish" };
+    },
+    quitGame: (state) => {
+      return { ...state, gameStatus: "idle" };
+    },
   },
 });
 
-export const { plusScore } = userSlice.actions;
+export const { plusScore, startGame, finishGame, quitGame } = userSlice.actions;
 
 export default userSlice.reducer;

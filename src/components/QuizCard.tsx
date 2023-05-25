@@ -1,56 +1,84 @@
 import { useAppDispatch, useAppSelector } from "../app/hook";
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { QuizAns } from "../utils/QuizAns";
 import { plusScore } from "../features/user/userSlice";
+import quizs from "../data.json";
+import { finishGame, quitGame } from "../features/user/userSlice";
+
 export const QuizCard = () => {
   const [index, setIndex] = useState(0);
+  const [countDown, setCountDown] = useState(5);
   const [showAnswer, setShowAnswer] = useState(false);
 
-  const quizs = useAppSelector((state) => state.quiz);
+  const timeRef = useRef<null | number>(null);
   const user = useAppSelector((state) => state.user);
   const dispatch = useAppDispatch();
 
-  const handleNextClick = () => {
+  // next event
+  const handleNextClick = useCallback(() => {
+    timeRef.current && clearTimeout(timeRef.current);
     if (index < quizs.length - 1) {
+      setCountDown(5);
       setIndex((pre) => pre + 1);
       setShowAnswer(false);
     } else {
       setIndex(0);
+      dispatch(finishGame());
     }
+  }, [dispatch, index]);
+
+  // start timer
+  const startTimer = () => {
+    timeRef.current = setTimeout(() => {
+      if (countDown === 0) {
+        timeRef.current && clearTimeout(timeRef.current);
+        handleNextClick();
+      } else {
+        setCountDown(countDown - 1);
+      }
+    }, 1000);
   };
 
+  // check user answer and show true or false
   const checkAnswer = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+    timeRef.current && clearTimeout(timeRef.current);
     const userAnswer = e.currentTarget.id;
     const correctAns = quizs[index].correct_answer;
-    if (userAnswer === correctAns) {
-      console.log("answer true");
-      dispatch(plusScore());
-    } else {
-      console.log("false answer");
-    }
+    if (userAnswer === correctAns) dispatch(plusScore());
     setShowAnswer(true);
   };
 
+  useEffect(startTimer, [countDown, handleNextClick]);
+
+  // quit game
+  const quitGameHandler = () => {
+    dispatch(quitGame());
+  };
+
   return (
-    <div className=" w-[45rem] h-[20rem] p-4 rounded-xl shadow-sm shadow-black m-auto container">
-      {/* time */}
-      <div>0:31</div>
-      <div>score: {user.totalScore}</div>
-      <div>
-        {/* question */}
-        <div className=" font-bold text-lg text-[#001e4d] text-center">
-          {quizs[index].question}
-        </div>
-        {/* answers */}
-        <div className=" flex flex-wrap justify-around my-4">
-          <QuizAns
-            quiz={quizs[index]}
-            showAnswer={showAnswer}
-            checkAnswer={checkAnswer}
-          />
-        </div>
+    <div className=" card sm:h-[21rem] h-[100vh]">
+      {/* time & scores & quit btn */}
+      <div className="flex justify-between my-4 items-center">
+        <div>Time left: {countDown}</div>
+        <div>score: {user.totalScore}</div>
+        <button onClick={quitGameHandler} className="quit_btn">
+          Quit
+        </button>
       </div>
-      <button className=" text-white btn" onClick={handleNextClick}>
+      {/* question */}
+      <div className=" font-bold text-lg text-[#212f46] text-center">
+        {quizs[index].question}
+      </div>
+      {/* answers */}
+      <div className=" flex flex-wrap items-center justify-center my-4 sm:justify-between">
+        <QuizAns
+          quiz={quizs[index]}
+          showAnswer={showAnswer}
+          checkAnswer={checkAnswer}
+        />
+      </div>
+      {/* next btn */}
+      <button className=" btn float-right" onClick={handleNextClick}>
         Next
       </button>
     </div>
