@@ -6,12 +6,12 @@ Clone down this repository. You will need node and npm installed globally on you
 
 **Installation:**
 
-npm install
+==npm install==
 
 **To run the code**
 
-npm run dev
+==npm run dev==
 
 **To visit App locally**
 
-http://localhost:5173/
+==http://localhost:5173/==
