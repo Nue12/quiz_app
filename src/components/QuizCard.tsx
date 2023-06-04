@@ -1,5 +1,5 @@
 import { useAppDispatch, useAppSelector } from "../app/hook";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { QuizAns } from "../utils/QuizAns";
 import { plusScore } from "../features/user/userSlice";
 import quizs from "../data.json";
@@ -40,13 +40,16 @@ export const QuizCard = () => {
   };
 
   // check user answer and show true or false
-  const checkAnswer = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    timeRef.current && clearTimeout(timeRef.current);
-    const userAnswer = e.currentTarget.id;
-    const correctAns = quizs[index].correct_answer;
-    if (userAnswer === correctAns) dispatch(plusScore());
-    setShowAnswer(true);
-  };
+  const checkAnswer = useCallback(
+    (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+      timeRef.current && clearTimeout(timeRef.current);
+      const userAnswer = e.currentTarget.id;
+      const correctAns = quizs[index].correct_answer;
+      if (userAnswer === correctAns) dispatch(plusScore());
+      setShowAnswer(true);
+    },
+    [dispatch, index]
+  );
 
   useEffect(startTimer, [countDown, handleNextClick]);
 
@@ -54,6 +57,11 @@ export const QuizCard = () => {
   const quitGameHandler = () => {
     dispatch(quitGame());
   };
+
+  const quizAnsList = useMemo(
+    () => QuizAns(quizs[index], showAnswer, checkAnswer),
+    [checkAnswer, index, showAnswer]
+  );
 
   return (
     <div className=" card sm:h-[21rem] h-[100vh]">
@@ -71,11 +79,12 @@ export const QuizCard = () => {
       </div>
       {/* answers */}
       <div className=" flex flex-wrap items-center justify-center my-4 sm:justify-between">
-        <QuizAns
+        {/* <QuizAns
           quiz={quizs[index]}
           showAnswer={showAnswer}
           checkAnswer={checkAnswer}
-        />
+        /> */}
+        {quizAnsList}
       </div>
       {/* next btn */}
       <button className=" btn float-right" onClick={handleNextClick}>

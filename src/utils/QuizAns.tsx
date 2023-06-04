@@ -1,12 +1,17 @@
 import { QuizDataType } from "../typings/types";
 
-interface Props {
-  quiz: QuizDataType;
-  showAnswer: boolean;
-  checkAnswer: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
-}
+// interface Props {
+//   quiz: QuizDataType;
+//   showAnswer: boolean;
+//   checkAnswer: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
+// }
 
-export const QuizAns = ({ quiz, showAnswer, checkAnswer }: Props) => {
+export const QuizAns = (
+  quiz: QuizDataType,
+  showAnswer: boolean,
+  checkAnswer: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void
+) => {
+  console.log("hello from Quiz Ans");
   return (
     <>
       {quiz.choices.map((ans) => {
